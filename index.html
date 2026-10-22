@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Servidor - WEATHERLINK</title>
+    <style>
+        :root {
+            /* Paleta de Cores Corporativa */
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-red: #ef4444;
+            --border-color: #334155;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at top left, #1e293b 0%, #0f172a 100%);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            width: 95%;
+            max-width: 1000px;
+        }
+
+        .main-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 25px 50px -12px var(--shadow-color);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .header h1 span {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-size: 1.2rem;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .ip-badge {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-blue);
+            border: 1px solid var(--accent-blue);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+        }
+
+        .info-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            transition: background 0.3s ease;
+        }
+
+        .info-card:hover {
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .info-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Estilos de Destaque para a Análise Crítica */
+        .info-card.alert {
+            border: 2px solid var(--accent-red);
+            background: rgba(239, 68, 68, 0.08);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+        }
+
+        .info-card.alert:hover {
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        .info-card h2 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: var(--accent-blue);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-card.alert h2 {
+            color: var(--accent-red);
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid rgba(239, 68, 68, 0.3);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        strong {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        /* Destaque das listagens de limitação */
+        .info-card.alert li {
+            background: rgba(239, 68, 68, 0.15);
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-red);
+            border-bottom: none;
+            color: #f8fafc;
+        }
+
+        .info-card.alert li:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-card.alert li strong {
+            color: #fca5a5;
+            font-size: 1.05rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-blue);
+            margin-right: 8px;
+        }
+
+        .alert .dot {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .main-panel {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container" id="tilt-container">
+        <div class="main-panel">
+            
+            <!-- Cabeçalho -->
+            <header class="header">
+                <h1>weatherlink <span>UNIALCO &gt; ALCOOLVALE | ID: 61[cite: 1]</span></h1>
+                <div class="ip-badge">MAC: D0:17:C2:8D:73:38[cite: 1, 11]</div>
+            </header>
+
+            <!-- Informações do Sistema -->
+            <section class="info-card">
+                <h2>Identificação e Sistema</h2>
+                <ul>
+                    <li><span class="dot"></span><strong>Fabricante:</strong> ASUS[cite: 1]</li>
+                    <li><span class="dot"></span><strong>Tipo de Máquina:</strong> Desktop[cite: 1]</li>
+                    <li><span class="dot"></span><strong>Sistema Operativo:</strong> Microsoft Windows 10 Pro (64-bit), Edição 22H2[cite: 1]</li>
+                    <li><span class="dot"></span><strong>Firmware / BIOS:</strong> American Megatrends Inc. (Versão 2203, Data: 2015-06-17)[cite: 1]</li>
+                </ul>
+            </section>
+
+            <!-- Hardware da Máquina -->
+            <section class="info-card">
+                <h2>Especificações de Hardware</h2>
+                <ul>
+                    <li><span class="dot"></span><strong>Processador:</strong> Intel(R) Pentium(R) CPU G3260 @ 3.30GHz[cite: 1]</li>
+                    <li><span class="dot"></span><strong>Placa Gráfica:</strong> Intel(R) HD Graphics (Integrada)[cite: 1, 2]</li>
+                    <li><span class="dot"></span><strong>Memória RAM:</strong> DDR3-1333-DIMM (Frequência: 1333 MHz)[cite: 2]</li>
+                    <li><span class="dot"></span><strong>Adaptadores de Rede:</strong> Realtek RTL8111/8168/8211/8411 PCI Express Gigabit Ethernet Controller[cite: 1]</li>
+                </ul>
+            </section>
+
+            <!-- Armazenamento -->
+            <section class="info-card full-width">
+                <h2>Armazenamento Físico e Lógico</h2>
+                <ul>
+                    <li><span class="dot"></span><strong>Disco Físico Primário:</strong> KINGSTON SA400S37240G (Interface SATA, Tipo: SSD)[cite: 2]</li>
+                    <li><span class="dot"></span><strong>Volume C: (Sistema):</strong> 228.326 MB Totais (25% Livre / 57.337 MB Disponíveis)[cite: 2]</li>
+                    <li><span class="dot"></span><strong>Volume Reservado pelo Sistema:</strong> 49 MB Totais (35% Livre / 17 MB Disponíveis)[cite: 2]</li>
+                    <li><span class="dot"></span><strong>Volume Local Disk:</strong> 555 MB Totais (15% Livre / 84 MB Disponíveis)[cite: 2]</li>
+                </ul>
+            </section>
+
+            <!-- Alertas e Limitações DESTACADOS E DETALHADOS -->
+            <section class="info-card alert full-width">
+                <h2>⚠️ Análise Crítica e Limitações Técnicas</h2>
+                <ul>
+                    <li><strong>Processador Básico e Datado:</strong> O equipamento está munido de um processador Intel Pentium G3260 @ 3.30GHz e uma placa de sistema associada ao ano de 2015[cite: 1]. Esta CPU é focada no baixo custo (computação de entrada) e pode apresentar severas lentidões na execução de processos modernos e cargas de trabalho mais exigentes.</li>
+                    <li><strong>Tecnologia de Memória Obsoleta:</strong> O barramento de memória detectado é DDR3 operando a 1333 MHz[cite: 2]. Este é um padrão ultrapassado e com frequência de operação baixa quando comparado às arquiteturas modernas (DDR4 ou DDR5), o que cria gargalos de desempenho na resposta geral da máquina.</li>
+                    <li><strong>Capacidade Restrita de Armazenamento:</strong> Embora o computador beneficie da velocidade de leitura/gravação de um disco em estado sólido (SSD Kingston SA400)[cite: 2], a capacidade desse modelo é pequena. A unidade principal (C:) tem aproximadamente ~228 GB, com apenas cerca de 57 GB de espaço livre (25%)[cite: 2]. Esse limite impossibilita o armazenamento de grandes volumes de arquivos e pode dificultar o cacheamento correto do Windows no futuro.</li>
+                    <li><strong>Processamento Gráfico Limitado:</strong> O equipamento baseia-se unicamente em acelerador gráfico integrado (Intel HD Graphics) direto do processador, sem qualquer placa de vídeo dedicada (GPU)[cite: 1, 2]. Tarefas que dependam de renderização avançada ou cargas visuais intensas não são adequadas para este computador.</li>
+                </ul>
+            </section>
+
+        </div>
+    </div>
+
+</body>
+</html>
